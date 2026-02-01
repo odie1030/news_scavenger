@@ -85,7 +85,17 @@ class GameMecaHTMLCollector(BaseCollector):
                 should_continue = False
 
         # Limit to max_articles
-        return articles[:max_articles]
+        articles = articles[:max_articles]
+
+        # Fetch view counts for each article
+        print(f"조회수 수집 중... ({len(articles)}건)")
+        for i, article in enumerate(articles):
+            view_count = self._fetch_view_count(article.url)
+            article.view_count = view_count
+            if (i + 1) % 5 == 0:
+                print(f"  {i + 1}/{len(articles)} 완료")
+
+        return articles
 
     def _parse_page(self, soup: BeautifulSoup, cutoff_time: datetime) -> List[Article]:
         """Parse articles from a single page.
@@ -252,6 +262,35 @@ class GameMecaHTMLCollector(BaseCollector):
                 published_at=published_at,
                 source=self.source_name
             )
+
+        except Exception:
+            return None
+
+    def _fetch_view_count(self, url: str) -> Optional[int]:
+        """Fetch view count from article detail page.
+
+        Args:
+            url: Article URL
+
+        Returns:
+            View count or None if parsing fails
+        """
+        try:
+            response = self._make_request(url)
+            soup = BeautifulSoup(response.text, "lxml")
+
+            # Look for "게임메카 / 제휴처 통합 XXX,XXX View" pattern
+            page_text = soup.get_text()
+
+            # Pattern: "통합" followed by number with commas, then "View"
+            view_pattern = r"통합\s+([\d,]+)\s*View"
+            match = re.search(view_pattern, page_text)
+
+            if match:
+                view_str = match.group(1).replace(",", "")
+                return int(view_str)
+
+            return None
 
         except Exception:
             return None

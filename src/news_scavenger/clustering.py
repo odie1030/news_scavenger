@@ -58,8 +58,8 @@ class EventClusterer:
             for cluster_articles in clusters
         ]
 
-        # Sort by frequency (descending)
-        event_clusters.sort(key=lambda c: c.frequency, reverse=True)
+        # Sort by total views (descending), then frequency as tiebreaker
+        event_clusters.sort(key=lambda c: (c.total_views, c.frequency), reverse=True)
 
         return event_clusters
 

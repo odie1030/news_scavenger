@@ -58,12 +58,14 @@ class TrendFormatter:
                     "rank": trend.rank,
                     "headline": trend.headline,
                     "frequency": len(trend.articles),
+                    "total_views": sum(a.view_count or 0 for a in trend.articles),
                     "articles": [
                         {
                             "title": article.title,
                             "url": article.url,
                             "published_at": article.published_at.isoformat(),
-                            "source": article.source
+                            "source": article.source,
+                            "view_count": article.view_count
                         }
                         for article in trend.articles
                     ]
@@ -87,11 +89,13 @@ class TrendFormatter:
         print("=" * 80)
 
         for trend in trends:
+            total_views = sum(a.view_count or 0 for a in trend.articles)
             print(f"\n[{trend.rank}위] {trend.headline}")
-            print(f"관련 기사: {len(trend.articles)}건")
+            print(f"관련 기사: {len(trend.articles)}건 | 총 조회수: {total_views:,}")
 
             for idx, article in enumerate(trend.articles[:3], start=1):
-                print(f"  {idx}. {article.title[:60]}...")
+                view_str = f" ({article.view_count:,} views)" if article.view_count else ""
+                print(f"  {idx}. {article.title[:50]}...{view_str}")
                 print(f"     {article.url}")
 
             if len(trend.articles) > 3:
