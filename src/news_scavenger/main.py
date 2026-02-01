@@ -7,7 +7,7 @@ from pathlib import Path
 from .collectors import RSSCollector, GameMecaHTMLCollector
 from .processor import ArticleProcessor
 from .clustering import EventClusterer
-from .output import TrendFormatter
+from .output import TrendFormatter, json_to_markdown
 
 
 # This Is Game RSS feed URL
@@ -62,6 +62,17 @@ def main():
         choices=["tig-rss", "gamemeca"],
         default="gamemeca",
         help="뉴스 소스 선택 (기본값: gamemeca)"
+    )
+    parser.add_argument(
+        "--output-dir",
+        type=str,
+        default=None,
+        help="출력 디렉토리 (지정 시 latest_news/json과 latest_news/markdown에 날짜별 파일 생성)"
+    )
+    parser.add_argument(
+        "--generate-markdown",
+        action="store_true",
+        help="마크다운 파일도 함께 생성"
     )
 
     args = parser.parse_args()
@@ -119,12 +130,40 @@ def main():
     print(f"트렌드 생성 완료: {len(trends)}개")
 
     # Step 5: Output results
-    print(f"\n[5/5] 결과 저장 중: {args.output}")
     json_output = formatter.to_json(trends)
+    today_str = datetime.now().strftime("%Y%m%d")
 
-    output_path = Path(args.output)
-    output_path.write_text(json_output, encoding="utf-8")
-    print(f"저장 완료: {output_path.absolute()}")
+    if args.output_dir:
+        # Save to dated files in output directory
+        base_dir = Path(args.output_dir)
+        json_dir = base_dir / "json"
+        md_dir = base_dir / "markdown"
+        json_dir.mkdir(parents=True, exist_ok=True)
+        md_dir.mkdir(parents=True, exist_ok=True)
+
+        json_filename = f"gamemeca_{today_str}.json"
+        md_filename = f"gamemeca_{today_str}.md"
+        json_path = json_dir / json_filename
+        md_path = md_dir / md_filename
+
+        print(f"\n[5/5] 결과 저장 중...")
+        json_path.write_text(json_output, encoding="utf-8")
+        print(f"JSON 저장 완료: {json_path}")
+
+        # Generate markdown from JSON
+        json_to_markdown(str(json_path), str(md_path))
+    else:
+        # Original behavior: save to single output file
+        print(f"\n[5/5] 결과 저장 중: {args.output}")
+        output_path = Path(args.output)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        output_path.write_text(json_output, encoding="utf-8")
+        print(f"저장 완료: {output_path.absolute()}")
+
+        # Optionally generate markdown alongside JSON
+        if args.generate_markdown:
+            md_path = output_path.with_suffix(".md")
+            json_to_markdown(str(output_path), str(md_path))
 
     # Print summary
     formatter.print_summary(trends)
