@@ -49,23 +49,14 @@ class RSSCollector:
             # Parse RSS feed
             feed = feedparser.parse(response.content)
 
-            print(f"DEBUG: Feed 제목: {feed.feed.get('title', 'N/A')}")
-            print(f"DEBUG: 총 엔트리 수: {len(feed.entries)}")
-
             articles = []
             cutoff_time = datetime.now() - timedelta(hours=hours_back)
-            print(f"DEBUG: 기준 시각: {cutoff_time}")
 
-            for i, entry in enumerate(feed.entries[:max_articles]):
+            for entry in feed.entries[:max_articles]:
                 try:
                     article = self._parse_entry(entry)
-                    if article:
-                        is_recent = article.published_at >= cutoff_time
-                        if i < 3:  # Show details for first 3 entries
-                            print(f"DEBUG: Entry {i+1}: {article.title[:50]}...")
-                            print(f"  발행 시각: {article.published_at}, 최근 기사? {is_recent}")
-                        if is_recent:
-                            articles.append(article)
+                    if article and article.published_at >= cutoff_time:
+                        articles.append(article)
                 except Exception as e:
                     print(f"Error parsing entry: {e}")
                     continue

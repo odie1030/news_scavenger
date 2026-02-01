@@ -4,7 +4,7 @@ import argparse
 from datetime import datetime
 from pathlib import Path
 
-from .collectors import RSSCollector
+from .collectors import RSSCollector, GameMecaHTMLCollector
 from .processor import ArticleProcessor
 from .clustering import EventClusterer
 from .output import TrendFormatter
@@ -56,6 +56,13 @@ def main():
         action="store_true",
         help="주제 필터 비활성화"
     )
+    parser.add_argument(
+        "--source",
+        type=str,
+        choices=["tig-rss", "gamemeca"],
+        default="gamemeca",
+        help="뉴스 소스 선택 (기본값: gamemeca)"
+    )
 
     args = parser.parse_args()
 
@@ -63,13 +70,18 @@ def main():
     print("일일 AI·게임 뉴스 트렌드 수집 시스템")
     print("=" * 80)
     print(f"실행 시각: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    print(f"뉴스 소스: {args.source}")
     print(f"수집 범위: 최근 {args.hours}시간")
     print(f"최대 기사: {args.max_articles}건")
     print()
 
     # Step 1: Collect articles
     print("[1/5] 기사 수집 중...")
-    collector = RSSCollector("This Is Game", THIS_IS_GAME_RSS)
+    if args.source == "gamemeca":
+        collector = GameMecaHTMLCollector("GameMeca", category="industry")
+    else:  # tig-rss
+        collector = RSSCollector("This Is Game", THIS_IS_GAME_RSS)
+
     articles = collector.fetch_articles(
         max_articles=args.max_articles,
         hours_back=args.hours
