@@ -1,7 +1,7 @@
 [project]
 name = "news-scavenger"
 version = "0.1.0"
-description = "Add your description here"
+description = "Daily AI & Game news trend collection system"
 readme = "README.md"
 authors = [
     { name = "odie1030", email = "redian0419@gmail.com" }
@@ -12,6 +12,9 @@ dependencies = [
     "python-dateutil>=2.9.0.post0",
     "requests>=2.32.5",
 ]
+
+[project.scripts]
+news-scavenger = "news_scavenger.main:main"
 
 [build-system]
 requires = ["uv_build>=0.9.28,<0.10.0"]

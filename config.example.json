@@ -1,0 +1,28 @@
+{
+  "sources": [
+    {
+      "name": "This Is Game",
+      "type": "rss",
+      "url": "https://www.thisisgame.com/rss/webzine.xml",
+      "note": "실제 RSS URL을 확인하여 업데이트 필요"
+    },
+    {
+      "name": "GameMeca",
+      "type": "rss",
+      "url": "https://www.gamemeca.com/rss/news.xml",
+      "note": "실제 RSS URL을 확인하여 업데이트 필요"
+    }
+  ],
+  "collection": {
+    "max_articles_per_source": 100,
+    "hours_back": 24
+  },
+  "processing": {
+    "enable_topic_filter": true,
+    "similarity_threshold": 0.3
+  },
+  "output": {
+    "top_n": 10,
+    "format": "json"
+  }
+}
