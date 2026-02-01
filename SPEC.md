@@ -18,19 +18,14 @@ AI 및 게임 산업을 대상으로, **최근 24시간 내 반복적으로 보�
 
 * **This Is Game (TIG)**
 
-* RSS 제공 시 RSS 우선 사용
-* RSS 미제공 시 기사 목록 페이지 스크래핑
+* RSS 미제공 확인됨 → HTML 스크래핑 사용
 * 게임 전문 매체로서 주제 적합도와 신뢰도가 높음
-
-> **RSS (Really Simple Syndication)**
-> 웹사이트가 신규 콘텐츠를 외부에 배포하기 위해 제공하는 표준 피드(XML 형식).
-> HTML 스크래핑보다 안정적이며, 사이트가 공식적으로 허용한 수집 방식이다.
 
 ### 보조 소스 (Secondary)
 
 * **GameMeca**
 
-* RSS 우선, 불가 시 스크래핑
+* RSS 미제공 확인됨 → HTML 스크래핑 사용
 * **Naver News**
 
 * NAVER 뉴스 검색 API 사용

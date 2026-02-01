@@ -19,9 +19,9 @@ Key characteristics:
 The system should be organized into these main modules:
 
 1. **Data Collection Layer**
-   - RSS feed readers for This Is Game and GameMeca
+   - HTML scraping for This Is Game (RSS not available)
+   - RSS or HTML scraping for GameMeca
    - Naver News API client (using official search API)
-   - HTML scraping fallback when RSS unavailable
    - Collection limited to max 50-100 articles per keyword
 
 2. **Processing Pipeline**
@@ -72,11 +72,14 @@ src/news_scavenger/
 ├── output.py                # TrendFormatter (JSON output, console summary)
 └── collectors/
     ├── __init__.py
-    └── rss_collector.py     # RSSCollector (feedparser wrapper)
+    ├── base_collector.py            # BaseCollector (abstract base, rate limiting)
+    ├── rss_collector.py             # RSSCollector (feedparser wrapper)
+    ├── gamemeca_html_collector.py   # GameMecaHTMLCollector (HTML scraping)
+    └── html_utils.py                # HTML parsing utilities
 ```
 
 **Key Files:**
-- `main.py:14` - Hardcoded RSS URL (update here to change source)
+- `main.py` - Entry point, collector configuration
 - `models.py` - Article/EventCluster data structures
 - `clustering.py` - Token overlap similarity algorithm
 - `processor.py` - Topic filtering keywords defined here
@@ -91,11 +94,11 @@ Each keyword is queried separately; duplicate articles across keywords are expec
 ## Data Sources
 
 ### Primary
-- **This Is Game (TIG)**: Prefer RSS, fallback to scraping
+- **This Is Game (TIG)**: HTML scraping only (RSS not provided)
   - High relevance and reliability for game news
 
 ### Secondary
-- **GameMeca**: Prefer RSS, fallback to scraping
+- **GameMeca**: HTML scraping implemented, RSS planned
 - **Naver News**: Use official search API for broader coverage
 
 ## Execution Schedule
@@ -109,20 +112,14 @@ Implement as scheduled job (cron, systemd timer, cloud scheduler, etc.)
 ## Configuration
 
 **Current Setup (v0.1):**
-- RSS URL is hardcoded in `src/news_scavenger/main.py:14`
-- Only This Is Game RSS feed is active
-- To change RSS source, edit `THIS_IS_GAME_RSS` variable
+- GameMeca HTML collector is active
+- Collector settings are configured in `src/news_scavenger/main.py`
+- This Is Game: RSS not provided, HTML scraping planned
 
 **Future Configuration:**
 - See `config.example.json` for planned config file structure
 - Will support multiple sources with per-source settings
 - Config file feature not yet implemented
-
-**Verifying RSS URLs:**
-```bash
-# Test RSS feed manually
-uv run python -c "import feedparser; print(feedparser.parse('YOUR_RSS_URL').entries[:3])"
-```
 
 ## Korean Text Handling
 
@@ -140,19 +137,19 @@ uv run python -c "import feedparser; print(feedparser.parse('YOUR_RSS_URL').entr
 - **Package Manager**: uv (configured in pyproject.toml)
 - **RSS parsing**: feedparser 6.0.12+
 - **HTTP requests**: requests 2.32.5+
+- **HTML parsing**: beautifulsoup4 4.12.3+, lxml 5.1.0+
 - **Date handling**: python-dateutil 2.9.0+
 - **Text similarity**: Token-based overlap (Jaccard coefficient)
 - **Storage**: JSON file output (no database)
 
 **Implementation Status:**
-- ✅ RSS collection (This Is Game only)
+- ✅ GameMeca HTML scraping
 - ✅ Time filtering and topic filtering
 - ✅ Deduplication by URL
 - ✅ Event clustering with configurable threshold
 - ✅ Top N trend ranking and JSON output
+- ⏳ This Is Game HTML scraping (planned, RSS not available)
 - ⏳ Naver News API (planned)
-- ⏳ GameMeca RSS (planned)
-- ⏳ HTML scraping fallback (planned)
 - ⏳ Scheduling automation (manual cron setup required)
 
 ## Development Workflow
@@ -226,8 +223,8 @@ Each trend in the Top 10 must include:
 ## Troubleshooting
 
 **No articles collected:**
-- Verify RSS URL is accessible: `curl -I <RSS_URL>`
-- Check if feed has recent articles (within --hours window)
+- Verify target website is accessible
+- Check if source has recent articles (within --hours window)
 - Try increasing `--hours` or `--max-articles`
 
 **All articles filtered out:**
@@ -238,9 +235,9 @@ Each trend in the Top 10 must include:
 - Ensure terminal supports UTF-8: `export LANG=en_US.UTF-8`
 - Output files are always UTF-8 encoded
 
-**RSS feed parsing errors:**
-- Some feeds may have malformed XML - check feedparser warnings
-- Hardcoded URL in `main.py:14` may need updating if feed moves
+**HTML scraping errors:**
+- Website structure may have changed - check collector selectors
+- Rate limiting may apply - collector has built-in request delays
 
 ## Out of Scope for v1
 

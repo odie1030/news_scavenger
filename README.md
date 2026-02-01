@@ -6,7 +6,7 @@
 
 ## 기능
 
-- RSS 피드를 통한 뉴스 수집
+- HTML 스크래핑을 통한 뉴스 수집 (GameMeca)
 - AI/게임 관련 키워드 필터링
 - 중복 기사 제거
 - 이벤트 클러스터링 (유사 기사 그룹화)
@@ -40,11 +40,10 @@ uv run news-scavenger --help
 
 ## 설정
 
-현재 프로토타입은 하드코딩된 RSS URL을 사용합니다. 실제 사용을 위해서는 다음을 수행해야 합니다:
+현재는 GameMeca HTML 스크래핑이 기본으로 활성화되어 있습니다.
 
-1. This Is Game의 실제 RSS 피드 URL 확인
-2. `src/news_scavenger/main.py`의 `THIS_IS_GAME_RSS` 변수 업데이트
-3. 또는 `config.example.json`을 참고하여 설정 파일 기능 구현
+- 수집기 설정: `src/news_scavenger/main.py`
+- 설정 파일 예시: `config.example.json` (추후 구현 예정)
 
 ## 프로젝트 구조
 
@@ -58,7 +57,10 @@ src/news_scavenger/
 ├── output.py             # 출력 포맷팅
 └── collectors/
     ├── __init__.py
-    └── rss_collector.py  # RSS 수집기
+    ├── base_collector.py            # 수집기 베이스 클래스
+    ├── rss_collector.py             # RSS 수집기
+    ├── gamemeca_html_collector.py   # GameMeca HTML 스크래핑
+    └── html_utils.py                # HTML 파싱 유틸리티
 ```
 
 ## 개발
@@ -67,9 +69,8 @@ src/news_scavenger/
 
 ## 다음 단계
 
-- [ ] 실제 RSS URL 확인 및 업데이트
+- [ ] This Is Game HTML 스크래핑 추가 (RSS 미제공)
 - [ ] Naver News API 통합
-- [ ] GameMeca RSS 추가
 - [ ] 테스트 코드 작성
 - [ ] 스케줄러 설정 (cron 또는 systemd timer)
-- [ ] HTML 스크래핑 fallback 구현
+- [x] GameMeca HTML 스크래핑 구현
