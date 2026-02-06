@@ -2,8 +2,8 @@ name: Daily News Collection
 
 on:
   schedule:
-    # Run at 2:00 PM KST (05:00 UTC) every day
-    - cron: '0 5 * * *'
+    # Run at 11:00 AM KST (02:00 UTC) every day
+    - cron: '0 2 * * *'
   workflow_dispatch:
     # Allow manual trigger
 
