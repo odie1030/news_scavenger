@@ -53,3 +53,22 @@ jobs:
             git commit -m "Daily news update: ${DATE}"
             git push
           fi
+
+      - name: Send email notification
+        if: always()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          secure: true
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          to: ${{ secrets.MAIL_TO }}
+          from: ${{ secrets.MAIL_USERNAME }}
+          subject: "[${{ job.status }}] ${{ github.workflow }} - ${{ github.repository }}"
+          body: |
+            Workflow: ${{ github.workflow }}
+            Status:   ${{ job.status }}
+            Branch:   ${{ github.ref_name }}
+            Commit:   ${{ github.sha }}
+            Run URL:  ${{ github.server_url }}/${{ github.repository }}/actions/run/${{ github.run_id }}
