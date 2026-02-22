@@ -54,6 +54,20 @@ jobs:
             git push
           fi
 
+      - name: Read news content
+        id: news_content
+        if: always()
+        run: |
+          DATE=$(date +%Y%m%d)
+          MD_FILE="latest_news/markdown/gamemeca_${DATE}.md"
+          if [ -f "$MD_FILE" ]; then
+            echo "content<<EOF" >> $GITHUB_OUTPUT
+            cat "$MD_FILE" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          else
+            echo "content=파일이 생성되지 않았습니다: ${MD_FILE}" >> $GITHUB_OUTPUT
+          fi
+
       - name: Send email notification
         if: always()
         uses: dawidd6/action-send-mail@v3
@@ -71,4 +85,8 @@ jobs:
             Status:   ${{ job.status }}
             Branch:   ${{ github.ref_name }}
             Commit:   ${{ github.sha }}
-            Run URL:  ${{ github.server_url }}/${{ github.repository }}/actions/run/${{ github.run_id }}
+            Run URL:  ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+            ---
+
+            ${{ steps.news_content.outputs.content }}
